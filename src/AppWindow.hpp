@@ -16,7 +16,7 @@
 #include <wx/sound.h> // for now keep out of precomp
 
 #define MAJOR "1"
-#define MINOR "0"
+#define MINOR "1"
 #define PATCH "0"
 #define APP_RELEASE MAJOR "." MINOR "." PATCH
 
@@ -34,12 +34,10 @@ public:
 
 	// sounds stuff ig
 	// wxSound mouseclick; later installment thingy I will do
-
-	// file stuff ig
-	wxString currfilePath;
-	// document stuff
+	wxString currfilePath; // keep here for now
 	bool changesMade = false;
 	bool untitled = true;
+	
 
 	// App panel + App textCtrl
 	wxPanel* AppPanel = new wxPanel(this, wxID_ANY, 
@@ -72,8 +70,11 @@ public:
 class saveDialog : public wxDialog
 {
 public:
-	saveDialog(PadFrame* parentFrame, const wxString& title);
+	saveDialog(PadFrame* parentFrame, const wxString& title, const wxString& filepath);
 
+	void OnSavedialog(wxCommandEvent& event);
+	void OnDontSave(wxCommandEvent& event);
+	void OnCancel(wxCommandEvent& event);
 private:
 	PadFrame* m_parentFrame;
 };

@@ -42,11 +42,29 @@ PadFrame::PadFrame(const wxString& title)
     SetStatusText("widgetsPad | App Verison: Alpha " APP_RELEASE);
 }
 
-saveDialog::saveDialog(PadFrame* parentFrame, const wxString& title)
-    : wxDialog(parentFrame, wxID_ANY, title, wxDefaultPosition, wxSize(400, 300),
-        wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER & ~wxCLOSE_BOX & ~wxCAPTION)
+saveDialog::saveDialog(PadFrame* parentFrame, const wxString& title, const wxString& filepath)
+    : wxDialog(parentFrame, wxID_ANY, title, wxDefaultPosition, wxSize(350, 150),
+        wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER & ~wxCLOSE_BOX & ~wxCAPTION), m_parentFrame(parentFrame)
 {
+    CenterOnParent();
 
+    wxPanel* dialogPanel = new wxPanel(this, wxID_ANY);
+    if (filepath.IsEmpty())
+    {
+        wxStaticText* untitledText = new wxStaticText(dialogPanel, wxID_ANY, "Do you want to save changes to untitled?", wxPoint(20, 20)); // filler forced title
+    }
+    else
+    {
+        wxStaticText* untitledText = new wxStaticText(dialogPanel, wxID_ANY, "Do you want to save changes to " + filepath, wxPoint(20,20));
+    }
+
+    wxButton* savebtn = new wxButton(dialogPanel, wxID_SAVE, "Save", wxPoint(15, 75), wxSize(100, 50));
+    wxButton* dontbtn = new wxButton(dialogPanel, wxID_EXIT, "Don't Save", wxPoint(125, 75), wxSize(100, 50));
+    wxButton* cancbtn = new wxButton(dialogPanel, wxID_CANCEL, "Cancel", wxPoint(235, 75), wxSize(100, 50));
+
+    savebtn->Bind(wxEVT_BUTTON, &saveDialog::OnSavedialog, this, wxID_SAVE);
+    dontbtn->Bind(wxEVT_BUTTON, &saveDialog::OnDontSave, this, wxID_EXIT);
+    cancbtn->Bind(wxEVT_BUTTON, &saveDialog::OnCancel, this, wxID_CANCEL);
 }
 
 // PadFrame button and interactions
@@ -155,7 +173,7 @@ void PadFrame::OnExit(wxCommandEvent& event)
     }
     else
     {
-        saveDialog* dialog = new saveDialog(this, wxT(""));
+        saveDialog* dialog = new saveDialog(this, wxT(""), currfilePath);
         if (dialog->ShowModal() == wxID_OK);
     }
 }
@@ -163,5 +181,23 @@ void PadFrame::OnExit(wxCommandEvent& event)
 
 
 // saveDialog button and interactions
+void saveDialog::OnSavedialog(wxCommandEvent& event)
+{
+    if (m_parentFrame)
+        m_parentFrame->OnSave(event);
+    EndModal(wxID_OK);
+}
+
+void saveDialog::OnDontSave(wxCommandEvent& event)
+{
+    wxDialog::Destroy();
+    m_parentFrame->changesMade = false; // keep for now just for something idk, im tired
+    m_parentFrame->OnExit(event);
+}
+
+void saveDialog::OnCancel(wxCommandEvent& event)
+{
+    wxDialog::Destroy();
+}
 
 // saveDialog button and interactions
