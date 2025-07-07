@@ -14,8 +14,12 @@ https://wiki.wxwidgets.org/Reading_text_from_a_file
 
 ## Features
 
-nothing major
+Made the basics:
+	Can write onto panel
+	Can Save File / Save As
+	Can open multiple instances
+	Can open file from explorer
 
 ## Version
 
-Alpha 1.0.0
+Alpha 1.1.0

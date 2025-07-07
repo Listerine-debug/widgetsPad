@@ -55,7 +55,9 @@ saveDialog::saveDialog(PadFrame* parentFrame, const wxString& title, const wxStr
     }
     else
     {
-        wxStaticText* untitledText = new wxStaticText(dialogPanel, wxID_ANY, "Do you want to save changes to " + filepath, wxPoint(20,20));
+        wxFileName fn(filepath);
+        wxString filename = fn.GetFullName();
+        wxStaticText* untitledText = new wxStaticText(dialogPanel, wxID_ANY, "Do you want to save changes to " + filename, wxPoint(20, 20));
     }
 
     wxButton* savebtn = new wxButton(dialogPanel, wxID_SAVE, "Save", wxPoint(15, 75), wxSize(100, 50));
