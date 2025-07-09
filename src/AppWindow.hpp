@@ -1,7 +1,8 @@
 // File Name: AppWindow.hpp
 // Creator: Matteo Washington
-// Date of last modification: July 6 2025
+// Date of last modification: July 8 2025
 // Copyright (c) 2025 Matteo Washington
+// Description: 
 
 #pragma once
 
@@ -11,70 +12,103 @@
 	#include <wx/frame.h>
 	#include <wx/sizer.h>
 	#include <wx/panel.h>
+	#include <wx/statbmp.h>
+	#include <wx/image.h>
 #endif
-
-#include <wx/sound.h> // for now keep out of precomp
+	#include <wx/wfstream.h> 
+	#include <wx/txtstrm.h> 
+	#include <wx/filename.h>
 
 #define MAJOR "1"
-#define MINOR "1"
+#define MINOR "2"
 #define PATCH "0"
 #define APP_RELEASE MAJOR "." MINOR "." PATCH
 
+// App declare
 class widgetsPad : public wxApp
 {
 public:
 	virtual bool OnInit();
 };
 
-
+// Main frame declare // PadFrame
 class PadFrame : public wxFrame
 {
 public:
 	PadFrame(const wxString& title);
 
-	// sounds stuff ig
-	// wxSound mouseclick; later installment thingy I will do
-	wxString currfilePath; // keep here for now
-	bool changesMade = false;
-	bool untitled = true;
-	
+	// file stuff
+	wxString filePath;
+	wxString fileName;
+	wxString fileContent;
+	// wxFileName fn;
+	bool txt_Changes = false;
+	bool txt_Untitled = true;
 
-	// App panel + App textCtrl
-	wxPanel* AppPanel = new wxPanel(this, wxID_ANY, 
-		wxDefaultPosition, wxSize(800, 600));
+	// main panel and text area declare
+	wxPanel* appPanel;
+	wxTextCtrl* apptextCtrl;
+	wxBoxSizer* panelSizer;
 
-	wxTextCtrl* ApptextCtrl = new wxTextCtrl(AppPanel, wxUSE_TEXTCTRL,
-		wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE 
-	| wxHSCROLL | wxVSCROLL);
+	// menu bar stuff
+	wxMenuBar* menuBar;
+	wxMenu* fileMenu;
+	wxMenu* editMenu;
+	wxMenu* aboutMenu;
 
-	wxBoxSizer* panelSizer = new wxBoxSizer(wxVERTICAL);
-
-
-	// Main Menu bar
-	wxMenuBar* menuBar = new wxMenuBar();
-
-	// file menu
-	wxMenu* fileMenu = new wxMenu;
-
+	// File menu buttons
 	void OnNewWindow(wxCommandEvent& event);
 	void OnOpen(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
 	void OnSaveAs(wxCommandEvent& event);
-	// void OnPrint(wxCommandEvent& event); // Maybe
+	// void OnPrint(wxCommandEvent& event); still a maybe
 	void OnClose(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
 
-	void TextChanged(wxCommandEvent& event);
+	void OnTextChanged(wxCommandEvent& event);
+	// void OnRead();
+
+	// Edit menu buttons
+	// 
+	// void OnUndo(wxCommandEvent& event);
+	// void OnCut(wxCommandEvent& event);
+	// void OnCopy(wxCommandEvent& event);
+	// void OnPaste(wxCommandEvent& event);
+	// void OnDelete(wxCommandEvent& event);
+	
+	// void OnFind(wxCommandEvent& event);
+	// void OnFindNext(wxCommandEvent& event);
+	// void OnFindPrev(wxCommandEvent& event);
+	// void OnReplace(wxCommandEvent& event);
+	// void OnGoTo(wxCommandEvent& event);
+	// void OnFont(wxCommandEvent& event);
+
+	// About menu buttons
+	// 
+	// void OnAbout(wxCommandEvent& event);
+	// void OnHelp(wxCommandEvent& event);
 };
 
-class saveDialog : public wxDialog
+
+class SaveDialog : public wxDialog
 {
 public:
-	saveDialog(PadFrame* parentFrame, const wxString& title, const wxString& filepath);
-
-	void OnSavedialog(wxCommandEvent& event);
-	void OnDontSave(wxCommandEvent& event);
-	void OnCancel(wxCommandEvent& event);
+	SaveDialog(PadFrame* parentFrame, const wxString& fileName);
 private:
 	PadFrame* m_parentFrame;
+
+	// buttons
+	void OnSaveDialog(wxCommandEvent& event);
+	void OnDontSave(wxCommandEvent& event);
+	void OnCancel(wxCommandEvent& event);
 };
+
+/*
+class aboutDialog : public wxDialog
+{
+public:
+	aboutDialog(PadFrame& parentFrame);
+private:
+	PadFrame& m_ParentFrame;
+};
+*/

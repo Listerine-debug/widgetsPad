@@ -1,205 +1,316 @@
 // File Name: AppWindow.cpp
 // Creator: Matteo Washington
-// Date of last modification: July 6 2025
+// Date of last modification: July 8 2025
 // Copyright (c) 2025 Matteo Washington
 
 #include "AppWindow.hpp"
-#include <wx/wfstream.h> // borrow this from precomp
-#include <wx/txtstrm.h> //  borrow this from precomp
-#include <wx/filename.h> // borrow this from precomp
 
+// PADFRAME BEGIN
+//
+// PADFRAME CONSTRUCTOR
 PadFrame::PadFrame(const wxString& title)
-    : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600))
+	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600))
 {
-    panelSizer->Add(ApptextCtrl, 1, wxEXPAND | wxALL, 5);
-    AppPanel->SetSizer(panelSizer);
+	// Panel creation
+	appPanel = new wxPanel
+	(	
+		this, 
+		wxID_ANY,
+		wxDefaultPosition, 
+		wxSize(800, 600)
+	);
 
-    fileMenu->Append(wxID_NEW, "&New Window\tCtrl-N", "Create new instance");
-    fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open file");
-    fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save file");
-    fileMenu->Append(wxID_SAVEAS, "&Save As\tCtrl-Alt-S", "Save file as");
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_CLOSE, "&Close\tCtrl-C", "Close window");
-    fileMenu->Append(wxID_EXIT, "&Exit\tCtrl-X", "Exit application");
+	// text ctrl creation
+	apptextCtrl = new wxTextCtrl
+	(
+		appPanel, 
+		wxUSE_TEXTCTRL,
+		wxEmptyString,
+		wxDefaultPosition, 
+		wxDefaultSize,
+		wxTE_MULTILINE | wxHSCROLL | wxVSCROLL
+	);
 
-    menuBar->Append(fileMenu, "&File");
-    SetMenuBar(menuBar);
+	menuBar = new wxMenuBar();
+	fileMenu = new wxMenu();
 
-    Bind(wxEVT_MENU, &PadFrame::OnNewWindow, this, wxID_NEW);
-    Bind(wxEVT_MENU, &PadFrame::OnOpen, this, wxID_OPEN);
-    Bind(wxEVT_MENU, &PadFrame::OnSave, this, wxID_SAVE);
-    Bind(wxEVT_MENU, &PadFrame::OnSaveAs, this, wxID_SAVEAS);
-    Bind(wxEVT_MENU, &PadFrame::OnClose, this, wxID_CLOSE);
-    Bind(wxEVT_MENU, &PadFrame::OnExit, this, wxID_EXIT);
+	menuBar->Append(fileMenu, "&File");
+	SetMenuBar(menuBar);
 
-    wxFont font(13, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Consolas");
-    ApptextCtrl->SetFont(font);
+	// box siser creation
+	panelSizer = new wxBoxSizer(wxVERTICAL);
 
-    ApptextCtrl->Bind(wxEVT_TEXT, &PadFrame::TextChanged, this);
+	// Add panel sizer to textctrl
+	panelSizer->Add(apptextCtrl, 1, wxEXPAND | wxALL, 5);
+	appPanel->SetSizer(panelSizer);
 
+	// buttons append to file menu
+	fileMenu->Append(wxID_NEW,		"&New Window\tCtrl-N",		"");
+	fileMenu->Append(wxID_OPEN,		"&Open\tCtrl-O",			"");
+	fileMenu->Append(wxID_SAVE,		"&Save\tCtrl-S",			"");
+	fileMenu->Append(wxID_SAVEAS,	"&Save As\tCtrl+Alt+S",		"");
+	fileMenu->AppendSeparator();
+	fileMenu->Append(wxID_CLOSE,	"&Close\tCtrl+Alt+C",		"");
+	fileMenu->Append(wxID_EXIT,		"&Exit",					"");
 
-    CreateStatusBar(2);
-    SetStatusText("widgetsPad | App Verison: Alpha " APP_RELEASE);
+	Bind(wxEVT_MENU, &PadFrame::OnNewWindow, this, wxID_NEW);
+	Bind(wxEVT_MENU, &PadFrame::OnOpen, this, wxID_OPEN);
+	Bind(wxEVT_MENU, &PadFrame::OnSave, this, wxID_SAVE);
+	Bind(wxEVT_MENU, &PadFrame::OnSaveAs, this, wxID_SAVEAS);
+	Bind(wxEVT_MENU, &PadFrame::OnClose, this, wxID_CLOSE);
+	Bind(wxEVT_MENU, &PadFrame::OnExit, this, wxID_EXIT);
+
+	// Font control, will update to change font, as of NOW,
+	// font has been set to Consolas 13 size, as Windows 10 Notepad
+	wxFont Font
+	(
+		13, // size
+		wxFONTFAMILY_MODERN, // family
+		wxFONTSTYLE_NORMAL, // style
+		wxFONTWEIGHT_NORMAL, // weight
+		false, // underline ?
+		"Consolas" // font itself
+	);
+
+	// bind font to text plain
+	apptextCtrl->SetFont(Font);
+	apptextCtrl->Bind(wxEVT_TEXT, &PadFrame::OnTextChanged, this);
+
+	//status bar, update later
+	CreateStatusBar();
+	SetStatusText("widgetsPad | App Version: Alpha " APP_RELEASE);
 }
+// PADFRAME CONSTRUCTOR
 
-saveDialog::saveDialog(PadFrame* parentFrame, const wxString& title, const wxString& filepath)
-    : wxDialog(parentFrame, wxID_ANY, title, wxDefaultPosition, wxSize(350, 150),
-        wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER & ~wxCLOSE_BOX & ~wxCAPTION), m_parentFrame(parentFrame)
-{
-    CenterOnParent();
-
-    wxPanel* dialogPanel = new wxPanel(this, wxID_ANY);
-    if (filepath.IsEmpty())
-    {
-        wxStaticText* untitledText = new wxStaticText(dialogPanel, wxID_ANY, "Do you want to save changes to untitled?", wxPoint(20, 20)); // filler forced title
-    }
-    else
-    {
-        wxFileName fn(filepath);
-        wxString filename = fn.GetFullName();
-        wxStaticText* untitledText = new wxStaticText(dialogPanel, wxID_ANY, "Do you want to save changes to " + filename, wxPoint(20, 20));
-    }
-
-    wxButton* savebtn = new wxButton(dialogPanel, wxID_SAVE, "Save", wxPoint(15, 75), wxSize(100, 50));
-    wxButton* dontbtn = new wxButton(dialogPanel, wxID_EXIT, "Don't Save", wxPoint(125, 75), wxSize(100, 50));
-    wxButton* cancbtn = new wxButton(dialogPanel, wxID_CANCEL, "Cancel", wxPoint(235, 75), wxSize(100, 50));
-
-    savebtn->Bind(wxEVT_BUTTON, &saveDialog::OnSavedialog, this, wxID_SAVE);
-    dontbtn->Bind(wxEVT_BUTTON, &saveDialog::OnDontSave, this, wxID_EXIT);
-    cancbtn->Bind(wxEVT_BUTTON, &saveDialog::OnCancel, this, wxID_CANCEL);
-}
-
-// PadFrame button and interactions
-void PadFrame::TextChanged(wxCommandEvent& event)
-{
-    if (!ApptextCtrl->GetValue().IsEmpty())
-    {
-        changesMade = true;
-    }
-    else
-    {
-        changesMade = false;
-    }
-    event.Skip();
-}
-
+// Create New instance of APP
 void PadFrame::OnNewWindow(wxCommandEvent& event)
 {
-    ::wxExecute(wxTheApp->argv[0]);
+	::wxExecute(wxTheApp->argv[0]);
 }
 
+// Open Existing file
 void PadFrame::OnOpen(wxCommandEvent& event)
 {
-    wxFileDialog fdlog(this, "Open file", "", "", "All files (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-    if (fdlog.ShowModal() != wxID_OK)
-        return;
-    
-    untitled = false;
+	// Open file explorer
+	wxFileDialog openLog
+	(
+		this,
+		"Open file",
+		"",
+		"",
+		"All files (*.*)|*.*",
+		wxFD_OPEN | wxFD_FILE_MUST_EXIST
+	);
 
-    wxString filePath = fdlog.GetPath();
-    currfilePath = filePath;
-    SetTitle(wxFileName(currfilePath).GetFullName() + " - widgetsPad");
-    wxFileInputStream input(filePath);
-    if (!input.IsOk()) 
-    {
-        wxMessageBox("Cannot open file.", "Error", wxICON_ERROR);
-        return;
-    }
+	if (openLog.ShowModal() != wxID_OK)
+	{
+		return;
+	}
 
-    wxTextInputStream text(input, "\x09", wxConvUTF8);
-    wxString fileContent;
-    while (input.IsOk() && !input.Eof()) 
-    {
-        fileContent += text.ReadLine();
-        if (!input.Eof())
-            fileContent += "\n";
-    }
-    ApptextCtrl->SetValue(fileContent);
-    changesMade = false;
+	filePath = openLog.GetPath();
+	wxFileName fn(filePath);
+	fileName = fn.GetFullName();
+
+	SetTitle(fileName + " - widgetsPad");
+	wxFileInputStream Stream(filePath);
+	if (!Stream.IsOk())
+	{
+		wxMessageBox("Cannont open file!", "Error", wxICON_ERROR); 
+		return;
+	}
+
+	// READ FILE, but need to change to own function later, 
+	// maybe, idk how but I will find a way
+	wxTextInputStream Text(Stream, "\x09", wxConvUTF8);
+	while (Stream.IsOk() && !Stream.Eof())
+	{
+		fileContent += Text.ReadLine();
+		if (!Stream.Eof())
+			fileContent += "\n";
+	}
+	apptextCtrl->SetValue(fileContent);
+	txt_Changes = false;
+	txt_Untitled = false;
+	//////////////////////////////////////
 }
 
+// Save existing file
 void PadFrame::OnSave(wxCommandEvent& event)
 {
-    if (changesMade == false)
-    {
-        event.Skip();
-    }
-    else
-    {
-        if (untitled == true)
-        {
-            OnSaveAs(event);
-        }
-        else
-        {
-            wxFileOutputStream outputstream(currfilePath);
-            wxString content = ApptextCtrl->GetValue();
-            wxTextOutputStream text(outputstream, wxEOL_NATIVE, wxConvUTF8);
-            text.WriteString(content);
-            changesMade = false;
-            wxMessageBox(wxT("Changes saved"));
-        }
-    }
+	if (txt_Changes == false)
+	{
+		event.Skip();
+	}
+	else
+	{
+		if (txt_Untitled == true)
+		{
+			OnSaveAs(event);
+		}
+		else
+		{
+			// can be better
+			wxFileOutputStream o_Stream(filePath);
+			wxTextOutputStream o_Text(o_Stream, wxEOL_NATIVE, wxConvUTF8);
+			fileContent = apptextCtrl->GetValue();
+			o_Text.WriteString(fileContent);
+			wxMessageBox(wxT("Changes Saved!"), "Saved", wxICON_INFORMATION);
+			txt_Changes = false;
+		}
+	}
 }
 
+// Save file as new path, etc.
 void PadFrame::OnSaveAs(wxCommandEvent& event)
 {
-    wxFileDialog saveFile(this, _("Save TXT file"), "", "", "TXT files (*.txt)|*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-    if (saveFile.ShowModal() == wxID_CANCEL)
-        return;
+	wxFileDialog saveLog
+	(
+		this,
+		_("Save as TXT file"),
+		"",
+		"",
+		"TXT files (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT
+	);
 
-    wxString file = saveFile.GetPath();
-    currfilePath = file;
-    SetTitle(wxFileName(currfilePath).GetFullName() + " - widgetsPad");
-    wxFileOutputStream outputstream(saveFile.GetPath());
-    wxString content = ApptextCtrl->GetValue();
-    wxTextOutputStream text(outputstream, wxEOL_NATIVE, wxConvUTF8);
-    text.WriteString(content);
+	if (saveLog.ShowModal() != wxID_OK)
+	{
+		return;
+	}
 
-    // decide, do you destroy the frame or keep it?
-    // keep frame for now
-    changesMade = false;
-    untitled = false;
+	filePath = saveLog.GetPath();
+	wxFileName fn(filePath);
+	fileName = fn.GetFullName();
+
+	// can be better
+	SetTitle(fileName + " - widgetsPad");
+	wxFileOutputStream o_Stream(filePath);
+	wxTextOutputStream o_Text(o_Stream, wxEOL_NATIVE, wxConvUTF8);
+	fileContent = apptextCtrl->GetValue();
+	o_Text.WriteString(fileContent);
+	wxMessageBox(wxT("File saved!"), "Saved", wxICON_INFORMATION);
+
+	txt_Changes = false;
+	txt_Untitled = false;
 }
 
+// icon the app
 void PadFrame::OnClose(wxCommandEvent& event)
 {
-    Iconize(true);
+	Iconize(true);
 }
 
+// close and destroy application
 void PadFrame::OnExit(wxCommandEvent& event)
 {
-    if (changesMade == false)
-    {
-        wxWindow::Destroy();
-    }
-    else
-    {
-        saveDialog* dialog = new saveDialog(this, wxT(""), currfilePath);
-        if (dialog->ShowModal() == wxID_OK);
-    }
+	if (txt_Changes == false)
+	{
+		wxWindow::Destroy();
+	}
+	else
+	{
+		SaveDialog* t_saveDialog = new SaveDialog(this, fileName);
+		if (t_saveDialog->ShowModal() != wxID_OK)
+			wxMessageBox(wxT("Failed event!"), "Error", wxICON_ERROR); return;
+	}
+		
 }
-// PadFrame buttons and interactions
 
-
-// saveDialog button and interactions
-void saveDialog::OnSavedialog(wxCommandEvent& event)
+// check if the text in the area has been changed
+void PadFrame::OnTextChanged(wxCommandEvent& event)
 {
-    if (m_parentFrame)
-        m_parentFrame->OnSave(event);
-    EndModal(wxID_OK);
+	if (!apptextCtrl->GetValue().IsEmpty())
+	{
+		txt_Changes = true;
+	}
+	else
+	{
+		txt_Changes = false;
+	}
+	event.Skip();
 }
+// PADFRAME END
 
-void saveDialog::OnDontSave(wxCommandEvent& event)
+///////////////////////////////////////
+// SAVED DIALOG BEGIN
+SaveDialog::SaveDialog(PadFrame* parentFrame, const wxString& fileName)
+	: wxDialog(parentFrame, wxID_ANY, "", wxDefaultPosition, wxSize(350, 150),
+		wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER & ~wxCLOSE_BOX & ~wxCAPTION),
+	m_parentFrame(parentFrame)
 {
-    wxDialog::Destroy();
-    m_parentFrame->changesMade = false; // keep for now just for something idk, im tired
-    m_parentFrame->OnExit(event);
+	CenterOnParent();
+
+	if (fileName.IsEmpty())
+	{
+		wxStaticText* Text1 = new wxStaticText
+		(
+			this,
+			wxID_ANY,
+			"Do you want to save changes to untitled?", // forced tag
+			wxPoint(20, 20)
+		);
+	}
+	else
+	{
+		wxStaticText* Text2 = new wxStaticText
+		(
+			this,
+			wxID_ANY,
+			"Do you want to save changes to " + fileName,
+			wxPoint(20, 20)
+		);
+	}
+
+
+	// buttons
+	wxButton* saveBtn = new wxButton
+	(
+		this,
+		wxID_SAVE,
+		"Save",
+		wxPoint(15, 75),
+		wxSize(100,50)
+	);
+
+	wxButton* dontBtn = new wxButton
+	(
+		this,
+		wxID_EXIT,
+		"Don't Save",
+		wxPoint(125,75),
+		wxSize(100,50)
+	);
+
+	wxButton* cancelBtn = new wxButton
+	(
+		this,
+		wxID_CANCEL,
+		"Cancel",
+		wxPoint(235,75),
+		wxSize(100,50)
+	);
+
+	saveBtn->Bind(wxEVT_BUTTON, &SaveDialog::OnSaveDialog, this, wxID_SAVE);
+	dontBtn->Bind(wxEVT_BUTTON, &SaveDialog::OnDontSave, this, wxID_EXIT);
+	cancelBtn->Bind(wxEVT_BUTTON, &SaveDialog::OnCancel, this, wxID_CANCEL);
 }
 
-void saveDialog::OnCancel(wxCommandEvent& event)
+void SaveDialog::OnSaveDialog(wxCommandEvent& event)
 {
-    wxDialog::Destroy();
+	m_parentFrame->OnSave(event);
+	EndModal(wxID_OK);
 }
 
-// saveDialog button and interactions
+void SaveDialog::OnDontSave(wxCommandEvent& event)
+{
+	wxDialog::Destroy();
+	m_parentFrame->txt_Changes = false;
+	m_parentFrame->OnExit(event);
+}
+
+void SaveDialog::OnCancel(wxCommandEvent& event)
+{
+	wxDialog::Destroy();
+}
+
+// SAVED DIALOG END

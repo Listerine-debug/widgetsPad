@@ -7,19 +7,26 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 
 ## References
 
-https://wxwidgets.org/
-https://ptgmedia.pearsoncmg.com/images/0131473816/downloads/0131473816_book.pdf
-https://wiki.wxwidgets.org/Reading_text_from_a_file
+- [wxWidgets Home Page] https://wxwidgets.org/
+- [GUI programming with wxWidgets] https://ptgmedia.pearsoncmg.com/images/0131473816/downloads/0131473816_book.pdf
+- [wxWiki] https://wiki.wxwidgets.org/Main_Page
+- [wxWidgets Reading from a TXT file] https://wiki.wxwidgets.org/Reading_text_from_a_file
 
 
-## Features
+## Current Features
 
-Made the basics:
-	Can write onto panel, 
-	Can Save File / Save As, 
-	Can open multiple instances, 
-	Can open file from explorer 
+- Can open a New Instance
+- Can open existing TXT files , ONLY TXT >:O, cause I am bad : (
+- Can save current progress
+- Can save file as
+- Can iconize application (Button)
+- Can exit application (Button)
 
 ## Version
 
-Alpha 1.1.0
+- Alpha 1.2.0
+
+- Notes:
+	- Version: Alpha 1.0.0, Created the application
+	- Version: Alpha 1.1.0, Created SavedDialog
+	- Version: Alpha 1.2.0, Re-wrote Code Structure for maintainability

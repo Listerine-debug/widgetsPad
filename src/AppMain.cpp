@@ -10,7 +10,7 @@ IMPLEMENT_APP(widgetsPad)
 
 bool widgetsPad::OnInit()
 {
-	PadFrame* frame = new PadFrame(wxT("untitled - widgetsPad")); // filler for now forced title 
+	PadFrame* frame = new PadFrame(wxT("untitled - widgetsPad")); // filler for now, forced title 
 	frame->Show(true);
 	return true;
 }
