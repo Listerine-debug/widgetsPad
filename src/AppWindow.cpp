@@ -30,15 +30,17 @@ PadFrame::PadFrame(const wxString& title)
 		wxEmptyString,
 		wxDefaultPosition, 
 		wxDefaultSize,
-		wxTE_MULTILINE | wxHSCROLL | wxVSCROLL
+		wxTE_MULTILINE | wxHSCROLL | wxVSCROLL | wxTE_RICH
 	);
 
 	menuBar = new wxMenuBar();
 	fileMenu = new wxMenu();
 	editMenu = new wxMenu();
+	aboutMenu = new wxMenu();
 
 	menuBar->Append(fileMenu, "&File");
 	menuBar->Append(editMenu, "&Edit");
+	menuBar->Append(aboutMenu, "& About");
 	SetMenuBar(menuBar);
 
 	// box siser creation
@@ -72,6 +74,7 @@ PadFrame::PadFrame(const wxString& title)
 	editMenu->Append(wxID_PASTE,	"&Paste\tCtrl+P",			"");
 	editMenu->Append(wxID_DELETE,	"&Delete\tDel",				"");
 	editMenu->AppendSeparator();
+	editMenu->Append(wxID_DIALOG,	"&Find\tCtrl+F",			"");
 
 	Bind(wxEVT_MENU, &PadFrame::OnUndo, this, wxID_UNDO);
 	Bind(wxEVT_MENU, &PadFrame::OnRedo, this, wxID_REDO);
@@ -79,6 +82,14 @@ PadFrame::PadFrame(const wxString& title)
 	Bind(wxEVT_MENU, &PadFrame::OnCopy, this, wxID_COPY);
 	Bind(wxEVT_MENU, &PadFrame::OnPaste, this, wxID_PASTE);
 	Bind(wxEVT_MENU, &PadFrame::OnDelete, this, wxID_DELETE);
+	Bind(wxEVT_MENU, &PadFrame::OnFind, this, wxID_DIALOG);
+
+	// button append to about menu
+	aboutMenu->Append(wxID_ABOUT,	"&About\tCtrl+Q",			"");
+	aboutMenu->Append(wxID_HELP,	"&Help\tCtrl+H",			"");
+
+	Bind(wxEVT_MENU, &PadFrame::OnAbout, this, wxID_ABOUT);
+	Bind(wxEVT_MENU, &PadFrame::OnHelp, this, wxID_HELP);
 
 	// Font control, will update to change font, as of NOW,
 	// font has been set to Consolas 13 size, as Windows 10 Notepad
@@ -98,11 +109,14 @@ PadFrame::PadFrame(const wxString& title)
 	apptextCtrl->Bind(wxEVT_SET_CURSOR, &PadFrame::OnCursorChanged, this);
 
 	//status bar, updated
-	statusBar = CreateStatusBar(4);
+	statusBar = CreateStatusBar(5);
+	int widths[] = { 100, -1, -2, -3, -1 };
+	statusBar->SetStatusWidths(5, widths);
 	statusBar->SetStatusText("Ln " + Line + " Col " + Column, 0);
 	statusBar->SetStatusText(charCount + " characters", 1);
 	statusBar->SetStatusText("widgetsPad", 2);
 	statusBar->SetStatusText("Version: " APP_RELEASE, 3);
+	statusBar->SetStatusText("UTF-8", 4);
 }
 // PADFRAME CONSTRUCTOR
 
@@ -316,7 +330,27 @@ void PadFrame::OnDelete(wxCommandEvent& event)
 	apptextCtrl->GetSelection(&begin, &end);
 	apptextCtrl->Remove((long int)begin, (long int)end);
 }
+
+void PadFrame::OnFind(wxCommandEvent& event)
+{
+	FindDialog* t_FindDialog = new FindDialog(this, wxT("Find"));
+	if (t_FindDialog->ShowModal() == wxID_OK);
+}
 // EDIT MENU END
+
+// ABOUT MENU BEGIN
+
+void PadFrame::OnAbout(wxCommandEvent& event)
+{
+	wxMessageBox(wxT("OnAbout dialog"));
+}
+
+void PadFrame::OnHelp(wxCommandEvent& event)
+{
+	wxMessageBox(wxT("OnHelp dialog"));
+}
+
+// ABOUT MENU END
 
 
 // PADFRAME END
@@ -405,3 +439,115 @@ void SaveDialog::OnCancel(wxCommandEvent& event)
 }
 
 // SAVED DIALOG END
+
+///////////////////////////////////////////////////////////////////////////////////
+
+// FIND DIALOG BEGIN
+
+FindDialog::FindDialog(PadFrame* parentFrame, const wxString& title)
+	: wxDialog(parentFrame, wxID_ANY, "Find", wxDefaultPosition, wxSize(400, 200),
+		wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER), 
+	m_parentFrame(parentFrame)
+{
+	findPanel = new wxPanel
+	(
+		this,
+		wxID_ANY,
+		wxDefaultPosition,
+		wxSize(400, 200)
+	);
+	
+	findtextCtrl = new wxTextCtrl
+	(
+		findPanel,
+		wxUSE_TEXTCTRL,
+		wxEmptyString,
+		wxPoint(15, 20),
+		wxSize(350, 30)
+	);
+
+
+	wxFont Font
+	(
+		13, // size
+		wxFONTFAMILY_MODERN, // family
+		wxFONTSTYLE_NORMAL, // style
+		wxFONTWEIGHT_NORMAL, // weight
+		false, // underline ?
+		"Consolas" // font itself
+	);
+	
+	findtextCtrl->SetFont(Font);
+	rollback.SetTextColour(*wxBLACK);
+	rollback.SetBackgroundColour(*wxWHITE);
+	highlightStyle.SetTextColour(*wxBLUE);
+	highlightStyle.SetBackgroundColour(*wxLIGHT_GREY);
+
+	wxButton* findBtn = new wxButton
+	(
+		findPanel,
+		wxID_FIND,
+		"Find",
+		wxPoint(200, 100),
+		wxSize(100, 25)
+	);
+
+	findBtn->Bind(wxEVT_BUTTON, &FindDialog::OnFindDialog, this, wxID_FIND);
+	Bind(wxEVT_CLOSE_WINDOW, &FindDialog::OnCloseDialog, this);
+
+	text1 = new wxStaticText
+	(
+		findPanel,
+		wxID_STATIC,
+		m_charCount,
+		wxPoint(10, 90),
+		wxSize(20, 20)
+	);
+}
+
+void FindDialog::OnFindDialog(wxCommandEvent& event)
+{
+	int m_end = m_parentFrame->apptextCtrl->GetLastPosition();
+	m_parentFrame->apptextCtrl->SetStyle(0, m_end, rollback);
+
+	wxString findText = findtextCtrl->GetValue();
+	wxString fullText = m_parentFrame->apptextCtrl->GetValue();
+
+	if (findText.IsEmpty()) 
+	{
+		wxMessageBox(wxT("Please enter text to find."), "Empty Search", wxICON_INFORMATION);
+		return;
+	}
+
+	long pos		=		0;
+	long amount		=		0;
+	bool foundAny	=	false;
+
+	while ((pos = fullText.find(findText, pos)) != wxNOT_FOUND) 
+	{
+		amount += 1;
+		long end = pos + findText.Length();
+		m_parentFrame->apptextCtrl->SetStyle(pos, end, highlightStyle);
+		pos = end;
+		foundAny = true;
+	}
+
+	text1->SetLabel(wxString::Format("%d", amount));
+
+	if (!foundAny) 
+	{
+		wxMessageBox(wxT("No text found!"), "Not Found", wxICON_INFORMATION);
+	}
+}
+
+void FindDialog::OnCloseDialog(wxCloseEvent& event)
+{
+	if (event.CanVeto())
+	{
+		int m_end = m_parentFrame->apptextCtrl->GetLastPosition();
+		m_parentFrame->apptextCtrl->SetStyle(0, m_end, rollback);
+	}
+	Destroy();
+}
+
+// FIND DIALOG END

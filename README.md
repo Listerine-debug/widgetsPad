@@ -22,13 +22,15 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 - Can save file as
 - Can iconize application (Button)
 - Can exit application (Button)
+- Can find key characters or words
 
 ## Version
 
-- Alpha 0.3.0
+- Alpha 0.4.0
 
 - Notes:
 	- Version: Alpha 0.0.0, Created the application
 	- Version: Alpha 0.1.0, Created SavedDialog
 	- Version: Alpha 0.2.0, Re-wrote Code Structure for maintainability
 	- Version: Alpha 0.3.0, Created editMenu, restructured version history, added StatusBar features
+	- Version: Alpha 0.4.0, Created FindDialog, Created aboutMenu, Major! made Find feature

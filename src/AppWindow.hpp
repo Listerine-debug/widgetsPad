@@ -90,7 +90,7 @@ public:
 	void OnPaste(wxCommandEvent& event);
 	void OnDelete(wxCommandEvent& event);
 	
-	// void OnFind(wxCommandEvent& event);
+	void OnFind(wxCommandEvent& event);
 	// void OnFindNext(wxCommandEvent& event);
 	// void OnFindPrev(wxCommandEvent& event);
 	// void OnReplace(wxCommandEvent& event);
@@ -99,10 +99,14 @@ public:
 
 	// About menu buttons
 	// 
-	// void OnAbout(wxCommandEvent& event);
-	// void OnHelp(wxCommandEvent& event);
+	void OnAbout(wxCommandEvent& event);
+	void OnHelp(wxCommandEvent& event);
 };
 
+enum customID
+{
+	wxID_DIALOG
+};
 
 class SaveDialog : public wxDialog
 {
@@ -123,6 +127,15 @@ public:
 	FindDialog(PadFrame* parentFrame, const wxString& title);
 private:
 	PadFrame* m_parentFrame;
+	wxTextCtrl* findtextCtrl;
+	wxPanel* findPanel;
+	wxTextAttr highlightStyle;
+	wxTextAttr rollback;
+	wxString m_charCount = "0";
+	wxStaticText* text1;
+
+	void OnFindDialog(wxCommandEvent& event);
+	void OnCloseDialog(wxCloseEvent& event);
 };
 
 /*
