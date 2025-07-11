@@ -2,6 +2,7 @@
 // Creator: Matteo Washington
 // Date of last modification: July 8 2025
 // Copyright (c) 2025 Matteo Washington
+// Descrption: main file for all frames and dialogs
 
 #include "AppWindow.hpp"
 
@@ -65,6 +66,7 @@ PadFrame::PadFrame(const wxString& title)
 	Bind(wxEVT_MENU, &PadFrame::OnSaveAs, this, wxID_SAVEAS);
 	Bind(wxEVT_MENU, &PadFrame::OnClose, this, wxID_CLOSE);
 	Bind(wxEVT_MENU, &PadFrame::OnExit, this, wxID_EXIT);
+	Bind(wxEVT_CLOSE_WINDOW, &PadFrame::OnX, this);
 
 	// buttons append to edit menu
 	editMenu->Append(wxID_UNDO,		"&Undo\tCtrl+Z",			"");
@@ -241,6 +243,13 @@ void PadFrame::OnClose(wxCommandEvent& event)
 // close and destroy application
 void PadFrame::OnExit(wxCommandEvent& event)
 {
+	wxCloseEvent closeEvent(wxEVT_CLOSE_WINDOW);
+	OnX(closeEvent);
+}
+
+// very very bac BUT it works :3
+void PadFrame::OnX(wxCloseEvent& event)
+{
 	if (txt_Changes == false)
 	{
 		wxWindow::Destroy();
@@ -249,9 +258,8 @@ void PadFrame::OnExit(wxCommandEvent& event)
 	{
 		SaveDialog* t_saveDialog = new SaveDialog(this, fileName);
 		if (t_saveDialog->ShowModal() == wxID_OK);
-			// wxMessageBox(wxT("Failed event!"), "Error", wxICON_ERROR); return;
+		// wxMessageBox(wxT("Failed event!"), "Error", wxICON_ERROR); return;
 	}
-		
 }
 
 // check if the text in the area has been changed
@@ -333,8 +341,9 @@ void PadFrame::OnDelete(wxCommandEvent& event)
 
 void PadFrame::OnFind(wxCommandEvent& event)
 {
-	FindDialog* t_FindDialog = new FindDialog(this, wxT("Find"));
-	if (t_FindDialog->ShowModal() == wxID_OK);
+	FindFrame* t_FindFrame = new FindFrame(this, wxT("Find"));
+	t_FindFrame->Show(true);
+	//if (t_FindDialog->ShowModal() == wxID_OK);
 }
 // EDIT MENU END
 
@@ -444,8 +453,8 @@ void SaveDialog::OnCancel(wxCommandEvent& event)
 
 // FIND DIALOG BEGIN
 
-FindDialog::FindDialog(PadFrame* parentFrame, const wxString& title)
-	: wxDialog(parentFrame, wxID_ANY, "Find", wxDefaultPosition, wxSize(400, 200),
+FindFrame::FindFrame(PadFrame* parentFrame, const wxString& title)
+	: wxFrame(parentFrame, wxID_ANY, "Find", wxDefaultPosition, wxSize(400, 200),
 		wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER), 
 	m_parentFrame(parentFrame)
 {
@@ -480,6 +489,8 @@ FindDialog::FindDialog(PadFrame* parentFrame, const wxString& title)
 	findtextCtrl->SetFont(Font);
 	rollback.SetTextColour(*wxBLACK);
 	rollback.SetBackgroundColour(*wxWHITE);
+	finding.SetTextColour(*wxBLUE);
+	finding.SetBackgroundColour(*wxWHITE);
 	highlightStyle.SetTextColour(*wxBLUE);
 	highlightStyle.SetBackgroundColour(*wxLIGHT_GREY);
 
@@ -488,30 +499,54 @@ FindDialog::FindDialog(PadFrame* parentFrame, const wxString& title)
 		findPanel,
 		wxID_FIND,
 		"Find",
-		wxPoint(200, 100),
+		wxPoint(250, 65),
 		wxSize(100, 25)
 	);
 
-	findBtn->Bind(wxEVT_BUTTON, &FindDialog::OnFindDialog, this, wxID_FIND);
-	Bind(wxEVT_CLOSE_WINDOW, &FindDialog::OnCloseDialog, this);
+	wxButton* nextBtn = new wxButton
+	(
+		findPanel,
+		wxID_NEXT,
+		"Next",
+		wxPoint(250, 95),
+		wxSize(100, 25)
+	);
+
+	wxButton* prevBtn = new wxButton
+	(
+		findPanel,
+		wxID_PREV,
+		"Prev",
+		wxPoint(250, 125),
+		wxSize(100, 25)
+	);
+
+	findBtn->Bind(wxEVT_BUTTON, &FindFrame::OnFindFrame, this, wxID_FIND);
+	nextBtn->Bind(wxEVT_BUTTON, &FindFrame::OnNextFrame, this, wxID_NEXT);
+	prevBtn->Bind(wxEVT_BUTTON, &FindFrame::OnPrevFrame, this, wxID_PREV);
+	Bind(wxEVT_CLOSE_WINDOW, &FindFrame::OnCloseFrame, this);
 
 	text1 = new wxStaticText
 	(
 		findPanel,
 		wxID_STATIC,
-		m_charCount,
-		wxPoint(10, 90),
-		wxSize(20, 20)
+		"", // place holder
+		wxPoint(70, 90),
+		wxSize(70, 30)
 	);
+
+	text1->SetFont(Font);
 }
 
-void FindDialog::OnFindDialog(wxCommandEvent& event)
+void FindFrame::OnFindFrame(wxCommandEvent& event)
 {
 	int m_end = m_parentFrame->apptextCtrl->GetLastPosition();
 	m_parentFrame->apptextCtrl->SetStyle(0, m_end, rollback);
 
 	wxString findText = findtextCtrl->GetValue();
 	wxString fullText = m_parentFrame->apptextCtrl->GetValue();
+	m_findText = findText;
+	m_fullText = fullText;
 
 	if (findText.IsEmpty()) 
 	{
@@ -519,28 +554,83 @@ void FindDialog::OnFindDialog(wxCommandEvent& event)
 		return;
 	}
 
-	long pos		=		0;
-	long amount		=		0;
-	bool foundAny	=	false;
+	m_Count = 0;
+	m_Amount = 0;
+	long pos = 0;
+	long total = 0;
+	bool foundAny = false;
+
+	findList.clear();
 
 	while ((pos = fullText.find(findText, pos)) != wxNOT_FOUND) 
 	{
-		amount += 1;
+		findList.push_back(pos);
+		total += 1;
 		long end = pos + findText.Length();
-		m_parentFrame->apptextCtrl->SetStyle(pos, end, highlightStyle);
+		m_parentFrame->apptextCtrl->SetStyle(pos, end, wxTextAttr(*wxBLUE)); // change later
 		pos = end;
 		foundAny = true;
 	}
 
-	text1->SetLabel(wxString::Format("%d", amount));
+
+	m_Total = total;
+	text1->SetLabel(wxString::Format("1 of " + wxString::Format("%d", total)));
+	m_parentFrame->apptextCtrl->SetStyle(findList[0], findList[0] + findText.Length(), highlightStyle);
+	m_parentFrame->apptextCtrl->SetInsertionPoint(findList[0]);
+	m_foundAny = foundAny;
 
 	if (!foundAny) 
 	{
-		wxMessageBox(wxT("No text found!"), "Not Found", wxICON_INFORMATION);
+		wxMessageBox(wxT("No Mathces found!"), "Not Found", wxICON_INFORMATION);
 	}
 }
 
-void FindDialog::OnCloseDialog(wxCloseEvent& event)
+void FindFrame::OnNextFrame(wxCommandEvent& event)
+{
+	if (m_foundAny == false)
+	{
+		wxMessageBox(wxT("Please search for a word!"), "No Word", wxICON_INFORMATION);
+		return;
+	}
+	int prevAmount = m_Amount;
+	m_Amount += 1;
+	m_Count += 1;
+	if (m_Amount >= m_Total)
+	{
+		m_Amount = 0;
+		m_Count = 1;
+	}
+	// redundacny with findText and m_findText, fix later
+	// wxString findText = findtextCtrl->GetValue();
+	m_parentFrame->apptextCtrl->SetStyle(findList[prevAmount], findList[prevAmount] + m_findText.Length(), finding);
+	m_parentFrame->apptextCtrl->SetStyle(findList[m_Amount], findList[m_Amount] + m_findText.Length(), highlightStyle);
+	m_parentFrame->apptextCtrl->SetInsertionPoint(findList[m_Amount]);
+	text1->SetLabel(wxString::Format("%d of %d", m_Count, m_Total));
+}
+
+void FindFrame::OnPrevFrame(wxCommandEvent& event)
+{
+	if (m_foundAny == false)
+	{
+		wxMessageBox(wxT("Please search for a word!"), "No Word", wxICON_INFORMATION);
+		return;
+	}
+	int prevAmount = m_Amount;
+	m_Amount -= 1;
+	m_Count -= 1;
+	if (m_Amount < 0)
+	{
+		m_Amount = m_Total - 1;
+		m_Count = m_Total;
+	}
+	// wxString findText = findtextCtrl->GetValue();
+	m_parentFrame->apptextCtrl->SetStyle(findList[prevAmount], findList[prevAmount] + m_findText.Length(), finding);
+	m_parentFrame->apptextCtrl->SetStyle(findList[m_Amount], findList[m_Amount] + m_findText.Length(), highlightStyle);
+	m_parentFrame->apptextCtrl->SetInsertionPoint(findList[m_Amount]);
+	text1->SetLabel(wxString::Format("%d of %d", m_Count, m_Total));
+}
+
+void FindFrame::OnCloseFrame(wxCloseEvent& event)
 {
 	if (event.CanVeto())
 	{

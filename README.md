@@ -22,15 +22,23 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 - Can save file as
 - Can iconize application (Button)
 - Can exit application (Button)
-- Can find key characters or words
+- Can find key characters or words (Case Sensitive)
+- Can cycle through all key words
+
+- Upcoming Features
+	- OnReplace: Replaces all highlighted words
+	- OnFont: Can changed the font
+	- Dark Mode! :O
 
 ## Version
 
-- Alpha 0.4.0
+- Alpha 0.5.1
 
 - Notes:
-	- Version: Alpha 0.0.0, Created the application
-	- Version: Alpha 0.1.0, Created SavedDialog
-	- Version: Alpha 0.2.0, Re-wrote Code Structure for maintainability
-	- Version: Alpha 0.3.0, Created editMenu, restructured version history, added StatusBar features
-	- Version: Alpha 0.4.0, Created FindDialog, Created aboutMenu, Major! made Find feature
+	- Version: [Alpha 0.0.0], Created the application
+	- Version: [Alpha 0.1.0], Created SavedDialog
+	- Version: [Alpha 0.2.0], Re-wrote Code Structure for maintainability
+	- Version: [Alpha 0.3.0], Created editMenu, restructured version history, added StatusBar features
+	- Version: [Alpha 0.4.0], Created FindDialog, Created aboutMenu, Major! made Find feature
+	- Version: [Alpha 0.5.0], Changed FindDialog to wxFrame, created Prev and Next for finding Characters/Strings, created about me/help
+	- Version: [Alpha 0.5.1], added error handling for prev and next on FindFrame, or App would crash

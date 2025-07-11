@@ -2,7 +2,7 @@
 // Creator: Matteo Washington
 // Date of last modification: July 8 2025
 // Copyright (c) 2025 Matteo Washington
-// Description: 
+// Description: header file and declaration file for all functions and members 
 
 #pragma once
 
@@ -15,15 +15,20 @@
 	#include <wx/statbmp.h>
 	#include <wx/image.h>
 #endif
+	#include <wx/textctrl.h>
 	#include <wx/wfstream.h> 
 	#include <wx/txtstrm.h> 
 	#include <wx/filename.h>
 	#include <wx/cmdproc.h>
+	#include <iostream>
+	#include <vector>
+	#include <algorithm>
+	#include <iterator>
 
 #define TYPE "Alpha"
 #define MAJOR "0"
-#define MINOR "3"
-#define PATCH "0"
+#define MINOR "5"
+#define PATCH "1"
 #define APP_RELEASE TYPE " " MAJOR "." MINOR "." PATCH
 
 // App declare
@@ -75,6 +80,7 @@ public:
 	// void OnPrint(wxCommandEvent& event); still a maybe
 	void OnClose(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
+	void OnX(wxCloseEvent& event);
 
 	void OnTextChanged(wxCommandEvent& event);
 	void OnCursorChanged(wxSetCursorEvent& event);
@@ -103,10 +109,6 @@ public:
 	void OnHelp(wxCommandEvent& event);
 };
 
-enum customID
-{
-	wxID_DIALOG
-};
 
 class SaveDialog : public wxDialog
 {
@@ -121,24 +123,37 @@ private:
 	void OnCancel(wxCommandEvent& event);
 };
 
-class FindDialog : public wxDialog
+class FindFrame : public wxFrame
 {
 public:
-	FindDialog(PadFrame* parentFrame, const wxString& title);
+	FindFrame(PadFrame* parentFrame, const wxString& title);
 private:
 	PadFrame* m_parentFrame;
-	wxTextCtrl* findtextCtrl;
 	wxPanel* findPanel;
+	wxTextCtrl* findtextCtrl;
 	wxTextAttr highlightStyle;
 	wxTextAttr rollback;
-	wxString m_charCount = "0";
+	wxTextAttr finding;
 	wxStaticText* text1;
 
-	void OnFindDialog(wxCommandEvent& event);
-	void OnCloseDialog(wxCloseEvent& event);
+	wxString m_fullText;
+	wxString m_findText;
+
+	std::vector <int> findList = {};
+
+	int m_Amount = 0;
+	int m_Total = 0;
+	int m_Count = 1;
+
+	bool m_foundAny;
+
+	void OnFindFrame(wxCommandEvent& event);
+	void OnNextFrame(wxCommandEvent& event);
+	void OnPrevFrame(wxCommandEvent& event);
+	void OnCloseFrame(wxCloseEvent& event);
 };
 
-/*
+
 class aboutDialog : public wxDialog
 {
 public:
@@ -146,4 +161,10 @@ public:
 private:
 	PadFrame& m_ParentFrame;
 };
-*/
+
+enum customID
+{
+	wxID_DIALOG,
+	wxID_NEXT,
+	wxID_PREV
+};

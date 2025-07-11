@@ -2,6 +2,7 @@
 // Creator: Matteo Washington
 // Date of last modification: July 6 2025
 // Copyright (c) 2025 Matteo Washington
+// Description: main execute 
 
 #include "AppWindow.hpp"
 
