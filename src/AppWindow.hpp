@@ -18,11 +18,13 @@
 	#include <wx/wfstream.h> 
 	#include <wx/txtstrm.h> 
 	#include <wx/filename.h>
+	#include <wx/cmdproc.h>
 
-#define MAJOR "1"
-#define MINOR "2"
+#define TYPE "Alpha"
+#define MAJOR "0"
+#define MINOR "3"
 #define PATCH "0"
-#define APP_RELEASE MAJOR "." MINOR "." PATCH
+#define APP_RELEASE TYPE " " MAJOR "." MINOR "." PATCH
 
 // App declare
 class widgetsPad : public wxApp
@@ -41,9 +43,17 @@ public:
 	wxString filePath;
 	wxString fileName;
 	wxString fileContent;
+	wxString currentText;
+	wxString charCount =	"0";
+	wxString Line =			"1";
+	wxString Column =		"1";
+	long x, y = 0;
+
+	// wxString previousText;
 	// wxFileName fn;
 	bool txt_Changes = false;
 	bool txt_Untitled = true;
+	// bool txt_CurrentText = false;
 
 	// main panel and text area declare
 	wxPanel* appPanel;
@@ -55,6 +65,7 @@ public:
 	wxMenu* fileMenu;
 	wxMenu* editMenu;
 	wxMenu* aboutMenu;
+	wxStatusBar* statusBar;
 
 	// File menu buttons
 	void OnNewWindow(wxCommandEvent& event);
@@ -66,15 +77,18 @@ public:
 	void OnExit(wxCommandEvent& event);
 
 	void OnTextChanged(wxCommandEvent& event);
+	void OnCursorChanged(wxSetCursorEvent& event);
+	void OnUpdateStatusBar();
 	// void OnRead();
 
 	// Edit menu buttons
 	// 
-	// void OnUndo(wxCommandEvent& event);
-	// void OnCut(wxCommandEvent& event);
-	// void OnCopy(wxCommandEvent& event);
-	// void OnPaste(wxCommandEvent& event);
-	// void OnDelete(wxCommandEvent& event);
+	void OnUndo(wxCommandEvent& event);
+	void OnRedo(wxCommandEvent& event);
+	void OnCut(wxCommandEvent& event);
+	void OnCopy(wxCommandEvent& event);
+	void OnPaste(wxCommandEvent& event);
+	void OnDelete(wxCommandEvent& event);
 	
 	// void OnFind(wxCommandEvent& event);
 	// void OnFindNext(wxCommandEvent& event);
@@ -101,6 +115,14 @@ private:
 	void OnSaveDialog(wxCommandEvent& event);
 	void OnDontSave(wxCommandEvent& event);
 	void OnCancel(wxCommandEvent& event);
+};
+
+class FindDialog : public wxDialog
+{
+public:
+	FindDialog(PadFrame* parentFrame, const wxString& title);
+private:
+	PadFrame* m_parentFrame;
 };
 
 /*

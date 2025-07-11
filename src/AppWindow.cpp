@@ -11,6 +11,8 @@
 PadFrame::PadFrame(const wxString& title)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600))
 {
+	
+
 	// Panel creation
 	appPanel = new wxPanel
 	(	
@@ -33,8 +35,10 @@ PadFrame::PadFrame(const wxString& title)
 
 	menuBar = new wxMenuBar();
 	fileMenu = new wxMenu();
+	editMenu = new wxMenu();
 
 	menuBar->Append(fileMenu, "&File");
+	menuBar->Append(editMenu, "&Edit");
 	SetMenuBar(menuBar);
 
 	// box siser creation
@@ -45,9 +49,9 @@ PadFrame::PadFrame(const wxString& title)
 	appPanel->SetSizer(panelSizer);
 
 	// buttons append to file menu
-	fileMenu->Append(wxID_NEW,		"&New Window\tCtrl-N",		"");
-	fileMenu->Append(wxID_OPEN,		"&Open\tCtrl-O",			"");
-	fileMenu->Append(wxID_SAVE,		"&Save\tCtrl-S",			"");
+	fileMenu->Append(wxID_NEW,		"&New Window\tCtrl+N",		"");
+	fileMenu->Append(wxID_OPEN,		"&Open\tCtrl+O",			"");
+	fileMenu->Append(wxID_SAVE,		"&Save\tCtrl+S",			"");
 	fileMenu->Append(wxID_SAVEAS,	"&Save As\tCtrl+Alt+S",		"");
 	fileMenu->AppendSeparator();
 	fileMenu->Append(wxID_CLOSE,	"&Close\tCtrl+Alt+C",		"");
@@ -59,6 +63,22 @@ PadFrame::PadFrame(const wxString& title)
 	Bind(wxEVT_MENU, &PadFrame::OnSaveAs, this, wxID_SAVEAS);
 	Bind(wxEVT_MENU, &PadFrame::OnClose, this, wxID_CLOSE);
 	Bind(wxEVT_MENU, &PadFrame::OnExit, this, wxID_EXIT);
+
+	// buttons append to edit menu
+	editMenu->Append(wxID_UNDO,		"&Undo\tCtrl+Z",			"");
+	editMenu->Append(wxID_REDO,		"&Redo\tCtrl+Y",			"");
+	editMenu->Append(wxID_CUT,		"&Cut\tCtrl+X",				"");
+	editMenu->Append(wxID_COPY,		"&Copy\tCtrl+C",			"");
+	editMenu->Append(wxID_PASTE,	"&Paste\tCtrl+P",			"");
+	editMenu->Append(wxID_DELETE,	"&Delete\tDel",				"");
+	editMenu->AppendSeparator();
+
+	Bind(wxEVT_MENU, &PadFrame::OnUndo, this, wxID_UNDO);
+	Bind(wxEVT_MENU, &PadFrame::OnRedo, this, wxID_REDO);
+	Bind(wxEVT_MENU, &PadFrame::OnCut, this, wxID_CUT);
+	Bind(wxEVT_MENU, &PadFrame::OnCopy, this, wxID_COPY);
+	Bind(wxEVT_MENU, &PadFrame::OnPaste, this, wxID_PASTE);
+	Bind(wxEVT_MENU, &PadFrame::OnDelete, this, wxID_DELETE);
 
 	// Font control, will update to change font, as of NOW,
 	// font has been set to Consolas 13 size, as Windows 10 Notepad
@@ -75,13 +95,19 @@ PadFrame::PadFrame(const wxString& title)
 	// bind font to text plain
 	apptextCtrl->SetFont(Font);
 	apptextCtrl->Bind(wxEVT_TEXT, &PadFrame::OnTextChanged, this);
+	apptextCtrl->Bind(wxEVT_SET_CURSOR, &PadFrame::OnCursorChanged, this);
 
-	//status bar, update later
-	CreateStatusBar();
-	SetStatusText("widgetsPad | App Version: Alpha " APP_RELEASE);
+	//status bar, updated
+	statusBar = CreateStatusBar(4);
+	statusBar->SetStatusText("Ln " + Line + " Col " + Column, 0);
+	statusBar->SetStatusText(charCount + " characters", 1);
+	statusBar->SetStatusText("widgetsPad", 2);
+	statusBar->SetStatusText("Version: " APP_RELEASE, 3);
 }
 // PADFRAME CONSTRUCTOR
 
+
+// FILE MENU BEGIN
 // Create New instance of APP
 void PadFrame::OnNewWindow(wxCommandEvent& event)
 {
@@ -119,6 +145,8 @@ void PadFrame::OnOpen(wxCommandEvent& event)
 		return;
 	}
 
+	apptextCtrl->Clear();
+	fileContent = "";
 	// READ FILE, but need to change to own function later, 
 	// maybe, idk how but I will find a way
 	wxTextInputStream Text(Stream, "\x09", wxConvUTF8);
@@ -131,7 +159,6 @@ void PadFrame::OnOpen(wxCommandEvent& event)
 	apptextCtrl->SetValue(fileContent);
 	txt_Changes = false;
 	txt_Untitled = false;
-	//////////////////////////////////////
 }
 
 // Save existing file
@@ -140,24 +167,21 @@ void PadFrame::OnSave(wxCommandEvent& event)
 	if (txt_Changes == false)
 	{
 		event.Skip();
+		return;
 	}
-	else
+	if (txt_Untitled == true)
 	{
-		if (txt_Untitled == true)
-		{
-			OnSaveAs(event);
-		}
-		else
-		{
-			// can be better
-			wxFileOutputStream o_Stream(filePath);
-			wxTextOutputStream o_Text(o_Stream, wxEOL_NATIVE, wxConvUTF8);
-			fileContent = apptextCtrl->GetValue();
-			o_Text.WriteString(fileContent);
-			wxMessageBox(wxT("Changes Saved!"), "Saved", wxICON_INFORMATION);
-			txt_Changes = false;
-		}
+		OnSaveAs(event);
+		return;
 	}
+
+	// can be better
+	wxFileOutputStream o_Stream(filePath);
+	wxTextOutputStream o_Text(o_Stream, wxEOL_NATIVE, wxConvUTF8);
+	fileContent = apptextCtrl->GetValue();
+	o_Text.WriteString(fileContent);
+	wxMessageBox(wxT("Changes Saved!"), "Saved", wxICON_INFORMATION);
+	txt_Changes = false;
 }
 
 // Save file as new path, etc.
@@ -210,28 +234,95 @@ void PadFrame::OnExit(wxCommandEvent& event)
 	else
 	{
 		SaveDialog* t_saveDialog = new SaveDialog(this, fileName);
-		if (t_saveDialog->ShowModal() != wxID_OK)
-			wxMessageBox(wxT("Failed event!"), "Error", wxICON_ERROR); return;
+		if (t_saveDialog->ShowModal() == wxID_OK);
+			// wxMessageBox(wxT("Failed event!"), "Error", wxICON_ERROR); return;
 	}
 		
 }
 
 // check if the text in the area has been changed
+void PadFrame::OnUpdateStatusBar()
+{
+	size_t c_charCount = apptextCtrl->GetValue().Length();
+	charCount = wxString::Format("%zu", c_charCount);
+	SetStatusText(charCount + " characters", 1);
+
+	apptextCtrl->PositionToXY(apptextCtrl->GetInsertionPoint(), &x, &y);
+	Line = wxString::Format("%d", y + 1);
+	Column = wxString::Format("%d", x + 1);
+	statusBar->SetStatusText("Ln " + Line + " Col " + Column, 0);
+}
+
 void PadFrame::OnTextChanged(wxCommandEvent& event)
 {
-	if (!apptextCtrl->GetValue().IsEmpty())
-	{
-		txt_Changes = true;
-	}
-	else
-	{
-		txt_Changes = false;
-	}
+	// wxMessageBox(wxT("OnTextCalled")); debug
+	currentText = apptextCtrl->GetValue();
+	txt_Changes = (currentText != fileContent);
+	OnUpdateStatusBar();
 	event.Skip();
 }
+
+void  PadFrame::OnCursorChanged(wxSetCursorEvent& event)
+{
+	OnUpdateStatusBar();
+	event.Skip();
+}
+// FILE MENU END
+
+// EDIT MENU BEGIN
+void PadFrame::OnUndo(wxCommandEvent& event)
+{
+	if (apptextCtrl->CanUndo())
+	{
+		apptextCtrl->Undo();
+	}
+}
+
+void PadFrame::OnRedo(wxCommandEvent& event)
+{
+	if (apptextCtrl->CanRedo())
+	{
+		apptextCtrl->Redo();
+	}
+}
+
+void PadFrame::OnCut(wxCommandEvent& event)
+{
+	if (apptextCtrl->CanCut())
+	{
+		apptextCtrl->Cut();
+	}
+}
+
+void PadFrame::OnCopy(wxCommandEvent& event)
+{
+	if (apptextCtrl->CanCopy())
+	{
+		apptextCtrl->Copy();
+	}
+}
+
+void PadFrame::OnPaste(wxCommandEvent& event)
+{
+	if (apptextCtrl->CanPaste())
+	{
+		apptextCtrl->Paste();
+	}
+}
+
+void PadFrame::OnDelete(wxCommandEvent& event)
+{
+	long int begin, end;
+	apptextCtrl->GetSelection(&begin, &end);
+	apptextCtrl->Remove((long int)begin, (long int)end);
+}
+// EDIT MENU END
+
+
 // PADFRAME END
 
-///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
 // SAVED DIALOG BEGIN
 SaveDialog::SaveDialog(PadFrame* parentFrame, const wxString& fileName)
 	: wxDialog(parentFrame, wxID_ANY, "", wxDefaultPosition, wxSize(350, 150),

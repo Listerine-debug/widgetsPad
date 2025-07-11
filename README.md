@@ -11,6 +11,7 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 - [GUI programming with wxWidgets] https://ptgmedia.pearsoncmg.com/images/0131473816/downloads/0131473816_book.pdf
 - [wxWiki] https://wiki.wxwidgets.org/Main_Page
 - [wxWidgets Reading from a TXT file] https://wiki.wxwidgets.org/Reading_text_from_a_file
+- [wxWidgets Undo/Redo] https://www.youtube.com/watch?app=desktop&v=LmPQA3UGxc4
 
 
 ## Current Features
@@ -24,9 +25,10 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 
 ## Version
 
-- Alpha 1.2.0
+- Alpha 0.3.0
 
 - Notes:
-	- Version: Alpha 1.0.0, Created the application
-	- Version: Alpha 1.1.0, Created SavedDialog
-	- Version: Alpha 1.2.0, Re-wrote Code Structure for maintainability
+	- Version: Alpha 0.0.0, Created the application
+	- Version: Alpha 0.1.0, Created SavedDialog
+	- Version: Alpha 0.2.0, Re-wrote Code Structure for maintainability
+	- Version: Alpha 0.3.0, Created editMenu, restructured version history, added StatusBar features
