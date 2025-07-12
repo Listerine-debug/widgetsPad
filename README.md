@@ -26,16 +26,17 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 - Can find key characters or words (Case Sensitive)
 - Can cycle through all key words
 
-- Upcoming Features
-	- OnReplace: Replaces all highlighted words
-	- OnFont: Can changed the font
-	- Dark Mode! :O
-	- Better memory management!
-	- Better find feature (like where it won't take forever, lol)
+## Upcoming Features
+
+- OnReplace: Replaces all highlighted words
+- OnFont: Can changed the font
+- Dark Mode! :O
+- Better memory management!
+- Better Find feature (like where it won't take forever, lol)
 
 ## Version
 
-Please leave feedback if there are any errors!
+Please leave feedback if there are any errors, things to improve, or even to work together! 
 
 - Alpha 0.6.1
 
