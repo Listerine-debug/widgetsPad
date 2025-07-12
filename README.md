@@ -12,6 +12,7 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 - [wxWiki] https://wiki.wxwidgets.org/Main_Page
 - [wxWidgets Reading from a TXT file] https://wiki.wxwidgets.org/Reading_text_from_a_file
 - [wxWidgets Undo/Redo] https://www.youtube.com/watch?app=desktop&v=LmPQA3UGxc4
+- [widgetsPad Icon] https://www.steamgriddb.com/icon/8335
 
 
 ## Current Features
@@ -29,10 +30,14 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 	- OnReplace: Replaces all highlighted words
 	- OnFont: Can changed the font
 	- Dark Mode! :O
+	- Better memory management!
+	- Better find feature (like where it won't take forever, lol)
 
 ## Version
 
-- Alpha 0.5.1
+Please leave feedback if there are any errors!
+
+- Alpha 0.6.1
 
 - Notes:
 	- Version: [Alpha 0.0.0], Created the application
@@ -42,3 +47,4 @@ personality, work ethic, and needs. So if you're ready to swap complexity for si
 	- Version: [Alpha 0.4.0], Created FindDialog, Created aboutMenu, Major! made Find feature
 	- Version: [Alpha 0.5.0], Changed FindDialog to wxFrame, created Prev and Next for finding Characters/Strings, created about me/help
 	- Version: [Alpha 0.5.1], added error handling for prev and next on FindFrame, or App would crash
+	- Version: [Alpha 0.6.1], Added app Icons. Finished Alpha phase! Things going forward, better memory management! And better layout.

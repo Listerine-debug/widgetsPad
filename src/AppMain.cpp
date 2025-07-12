@@ -1,7 +1,7 @@
 // File Name: AppMain.cpp
-// Creator: Matteo Washington
-// Date of last modification: July 6 2025
-// Copyright (c) 2025 Matteo Washington
+// Creator: Matteo Washington (Aka: Listerine-debug)
+// Date of last modification: July 11 2025
+// Copyright (c) 2025 Matteo Washington 
 // Description: main execute 
 
 #include "AppWindow.hpp"

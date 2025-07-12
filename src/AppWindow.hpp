@@ -1,6 +1,6 @@
 // File Name: AppWindow.hpp
-// Creator: Matteo Washington
-// Date of last modification: July 8 2025
+// Creator: Matteo Washington (Aka: Listerine-debug)
+// Date of last modification: July 11 2025
 // Copyright (c) 2025 Matteo Washington
 // Description: header file and declaration file for all functions and members 
 
@@ -14,6 +14,7 @@
 	#include <wx/panel.h>
 	#include <wx/statbmp.h>
 	#include <wx/image.h>
+	#include <wx/url.h>
 #endif
 	#include <wx/textctrl.h>
 	#include <wx/wfstream.h> 
@@ -24,10 +25,11 @@
 	#include <vector>
 	#include <algorithm>
 	#include <iterator>
+	#include "AppIcons.hpp"
 
 #define TYPE "Alpha"
 #define MAJOR "0"
-#define MINOR "5"
+#define MINOR "6"
 #define PATCH "1"
 #define APP_RELEASE TYPE " " MAJOR "." MINOR "." PATCH
 
@@ -154,12 +156,16 @@ private:
 };
 
 
-class aboutDialog : public wxDialog
+class AboutDialog : public wxDialog
 {
 public:
-	aboutDialog(PadFrame& parentFrame);
+	AboutDialog(PadFrame* parentFrame, const wxString& title);
 private:
-	PadFrame& m_ParentFrame;
+	PadFrame* m_ParentFrame;
+	wxPanel* aboutPanel;
+	wxStaticBitmap* image;
+	wxStaticText* text1;
+	wxBoxSizer* aboutSizer;
 };
 
 enum customID

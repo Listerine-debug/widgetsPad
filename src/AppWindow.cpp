@@ -1,6 +1,6 @@
 // File Name: AppWindow.cpp
-// Creator: Matteo Washington
-// Date of last modification: July 8 2025
+// Creator: Matteo Washington (Aka: Listerine-debug)
+// Date of last modification: July 11 2025
 // Copyright (c) 2025 Matteo Washington
 // Descrption: main file for all frames and dialogs
 
@@ -12,7 +12,8 @@
 PadFrame::PadFrame(const wxString& title)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(800, 600))
 {
-	
+	wxIcon icon(wpIcon);
+	SetIcon(icon);
 
 	// Panel creation
 	appPanel = new wxPanel
@@ -351,12 +352,15 @@ void PadFrame::OnFind(wxCommandEvent& event)
 
 void PadFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox(wxT("OnAbout dialog"));
+	AboutDialog* t_AboutDialog = new AboutDialog(this, "About");
+	if (t_AboutDialog->ShowModal() == wxID_OK);
 }
 
 void PadFrame::OnHelp(wxCommandEvent& event)
 {
-	wxMessageBox(wxT("OnHelp dialog"));
+	// wxMessageBox(wxT("OnHelp dialog"));
+	wxString url = "https://github.com/Listerine-debug/widgetsPad";
+	wxLaunchDefaultBrowser(url);
 }
 
 // ABOUT MENU END
@@ -458,6 +462,8 @@ FindFrame::FindFrame(PadFrame* parentFrame, const wxString& title)
 		wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER), 
 	m_parentFrame(parentFrame)
 {
+	SetIcon(wxIcon(fFIcon));
+
 	findPanel = new wxPanel
 	(
 		this,
@@ -526,13 +532,14 @@ FindFrame::FindFrame(PadFrame* parentFrame, const wxString& title)
 	prevBtn->Bind(wxEVT_BUTTON, &FindFrame::OnPrevFrame, this, wxID_PREV);
 	Bind(wxEVT_CLOSE_WINDOW, &FindFrame::OnCloseFrame, this);
 
+
 	text1 = new wxStaticText
 	(
 		findPanel,
 		wxID_STATIC,
 		"", // place holder
-		wxPoint(70, 90),
-		wxSize(70, 30)
+		wxPoint(60, 90),
+		wxSize(100, 50)
 	);
 
 	text1->SetFont(Font);
@@ -545,6 +552,11 @@ void FindFrame::OnFindFrame(wxCommandEvent& event)
 
 	wxString findText = findtextCtrl->GetValue();
 	wxString fullText = m_parentFrame->apptextCtrl->GetValue();
+	if (fullText.IsEmpty())
+	{
+		wxMessageBox(wxT("The Text Field is empty, you won't find anything silly! :P"), "No Text", wxICON_INFORMATION);
+		return;
+	}
 	m_findText = findText;
 	m_fullText = fullText;
 
@@ -572,17 +584,18 @@ void FindFrame::OnFindFrame(wxCommandEvent& event)
 		foundAny = true;
 	}
 
+	if (!foundAny)
+	{
+		wxMessageBox(wxT("No Matches found!"), "Not Found", wxICON_INFORMATION);
+		text1->SetLabel("");
+		return;
+	}
 
 	m_Total = total;
 	text1->SetLabel(wxString::Format("1 of " + wxString::Format("%d", total)));
 	m_parentFrame->apptextCtrl->SetStyle(findList[0], findList[0] + findText.Length(), highlightStyle);
 	m_parentFrame->apptextCtrl->SetInsertionPoint(findList[0]);
 	m_foundAny = foundAny;
-
-	if (!foundAny) 
-	{
-		wxMessageBox(wxT("No Mathces found!"), "Not Found", wxICON_INFORMATION);
-	}
 }
 
 void FindFrame::OnNextFrame(wxCommandEvent& event)
@@ -641,3 +654,60 @@ void FindFrame::OnCloseFrame(wxCloseEvent& event)
 }
 
 // FIND DIALOG END
+
+// ABOUT DIALOG BEGIN
+AboutDialog::AboutDialog(PadFrame* parentFrame, const wxString& title)
+	: wxDialog(parentFrame, wxID_ANY, title, wxDefaultPosition, wxSize(500, 400),
+		wxDEFAULT_DIALOG_STYLE & ~wxRESIZE_BORDER), m_ParentFrame(parentFrame)
+{
+	aboutPanel = new wxPanel
+	(
+		this,
+		wxID_ANY,
+		wxDefaultPosition,
+		wxSize(400, 300)
+	);
+
+	wxFont Font
+	(
+		10, // size
+		wxFONTFAMILY_MODERN, // family
+		wxFONTSTYLE_NORMAL, // style
+		wxFONTWEIGHT_NORMAL, // weight
+		false, // underline ?
+		"Consolas" // font itself
+	);
+
+	aboutSizer = new wxBoxSizer(wxVERTICAL);
+
+	wxString text =
+		"Hello! My name is Listerine-debug, and I'm the creator of widgetsPad!\n\n"
+		"I hope you're enjoying the application. I've only been programming for a little over a year, "
+		"so there's still a lot to learn and improve. I'd really appreciate any feedback or even some collaboration "
+		"if you're interested!\n\n"
+		"Honestly, I made this because I had a genuine dislike for the Windows 11 Notepad. "
+		"You might ask, why? I'm not entirely sure either, LOL! I just didn’t like it :P.\n\n"
+		"For more details or a link to the GitHub repo, click the Help menu button or press \"Ctrl+H\".\n"
+		"I hope you have a lovely rest of your day! :3";
+
+	text1 = new wxStaticText
+	(
+		aboutPanel,
+		wxID_STATIC,
+		text, // place holder
+		wxPoint(150, 10),
+		wxSize(300, 350),
+		wxALIGN_LEFT | wxST_NO_AUTORESIZE
+	);
+	text1->Wrap(350);
+	text1->SetFont(Font);
+
+	wxImage::AddHandler(new wxXPMHandler());
+	wxBitmap xpmBitmap(Listerine);
+
+	image = new wxStaticBitmap(aboutPanel, wxID_ANY, xpmBitmap);
+
+	aboutSizer->Add(image, 0, wxALIGN_CENTER | wxALL, 10);
+	aboutSizer->Add(text1, 0, wxALL, 10);
+}
+// ABOUT DIALOG END
