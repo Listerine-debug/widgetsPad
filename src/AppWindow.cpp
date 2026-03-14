@@ -1,5 +1,5 @@
 // File Name: AppWindow.cpp
-// Creator: Matteo Washington (Aka: Listerine-debug)
+// Creator: (Aka: Listerine-debug)
 // Date of last modification: July 11 2025
 // Copyright (c) 2025 Matteo Washington
 // Descrption: main file for all frames and dialogs
@@ -686,7 +686,7 @@ AboutDialog::AboutDialog(PadFrame* parentFrame, const wxString& title)
 		"so there's still a lot to learn and improve. I'd really appreciate any feedback or even some collaboration "
 		"if you're interested!\n\n"
 		"Honestly, I made this because I had a genuine dislike for the Windows 11 Notepad. "
-		"You might ask, why? I'm not entirely sure either, LOL! I just didn’t like it :P.\n\n"
+		"You might ask, why? I'm not entirely sure either, LOL! I just didnÂ’t like it :P.\n\n"
 		"For more details or a link to the GitHub repo, click the Help menu button or press \"Ctrl+H\".\n"
 		"I hope you have a lovely rest of your day! :3";
 
