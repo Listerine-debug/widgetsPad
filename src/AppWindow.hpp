@@ -1,5 +1,5 @@
 // File Name: AppWindow.hpp
-// Creator: Matteo Washington (Aka: Listerine-debug)
+// Creator: (Aka: Listerine-debug)
 // Date of last modification: July 11 2025
 // Copyright (c) 2025 Matteo Washington
 // Description: header file and declaration file for all functions and members 
