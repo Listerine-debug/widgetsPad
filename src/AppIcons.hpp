@@ -1,5 +1,5 @@
 // File Name: AppIcons.hpp
-// Creator: Matteo Washington (Aka: Listerine-debug)
+// Creator: (Aka: Listerine-debug)
 // Date of last modification: July 11 2025
 // Copyright (c) 2025 Matteo Washington 
 // Description: Icons
